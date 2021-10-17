@@ -6,7 +6,7 @@ import argparse
 
 
 # ! [hash]['diffs'][0]['pp'] is str, need to be converted to float
-diff_info_T = dict[str, Union[str, int, float]]
+diff_info_T = dict[str, Union[str, int, float, None]]
 all_maps_T = dict[str, Union[list[diff_info_T], str, int, float]]
 
 beat_star_database_link = "https://cdn.wes.cloud/beatstar/bssb/v2-all.json.gz"
