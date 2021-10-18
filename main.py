@@ -23,7 +23,7 @@ def decompress_gz(file_content: bytes) -> bytes:
 
 def get_all_maps(
     source: str,
-) -> dict[str, all_maps_T]:
+) -> all_maps_T:
     file_content = str()
     if source:
         gz_file = download(beat_star_database_link)
@@ -56,7 +56,20 @@ def construct_command_parser() -> argparse.Namespace:
         default=1e5,
     )
     parser.add_argument(
-        "-s", "--source-file", dest="source_file", type=str, help="", default=""
+        "-s",
+        "--source-file",
+        dest="source_file",
+        type=str,
+        help="the path of the beat star data file",
+        default="",
+    )
+    parser.add_argument(
+        "-o",
+        "--save-as",
+        dest="save_as",
+        type=str,
+        help="save playlist as",
+        default="playlist.json",
     )
     return parser.parse_args()
 
@@ -67,12 +80,17 @@ def filter_map(all_maps: all_maps_T, lower: float, upper: float) -> list[str]:
 
 
 # TODO
-def construct_playlist(all_maps: all_maps_T) -> dict[str, Any]:
+def construct_playlist(all_maps: all_maps_T, map_list: list[str]) -> dict[str, Any]:
     return dict()
 
 
 def main():
-    parser = construct_command_parser()
+    args = construct_command_parser()
+    all_maps = get_all_maps(args.source_file)
+    map_list = filter_map(all_maps, args.lower_bound, args.upper_bound)
+    playlist = construct_playlist(all_maps, map_list)
+    with open(args.save_as, "w", encoding="utf-8") as f:
+        f.write(json.dumps(playlist))
 
 
 if __name__ == "__main__":
