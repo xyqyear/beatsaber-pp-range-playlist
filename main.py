@@ -39,8 +39,23 @@ Map = TypedDict(
         "uploaddate": str,
     },
 )
+PlaylistSongDiff = TypedDict("PlaylistSongDiff", {"characteristic": str, "name": str})
+PlaylistSong = TypedDict(
+    "PlaylistSong", {"hash": str, "difficulties": list[PlaylistSongDiff]}
+)
+Playlist = TypedDict(
+    "Playlist",
+    {
+        "playlistTitle": str,
+        "playlistAuthor": str,
+        "playlistDescription": str,
+        "songs": list[PlaylistSong],
+        "image": str,
+    },
+)
 
 beat_star_database_link = "https://cdn.wes.cloud/beatstar/bssb/v2-all.json.gz"
+
 
 # TODO
 def download(url: str) -> bytes:
