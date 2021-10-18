@@ -142,7 +142,6 @@ def filter_map(
 
 
 def construct_playlist(
-    all_maps: dict[str, Map],
     map_hash_list: list[tuple[str, list[str]]],
     image: bytes,
     title: str = "playlist",
@@ -168,7 +167,7 @@ def main():
     args = construct_command_parser()
     all_maps = get_all_maps(args.source_file)
     map_hash_list = filter_map(all_maps, args.lower_bound, args.upper_bound)
-    playlist = construct_playlist(all_maps, map_hash_list, b"")
+    playlist = construct_playlist(map_hash_list, b"")
     with open(args.save_as, "w", encoding="utf-8") as f:
         f.write(json.dumps(playlist))
 
