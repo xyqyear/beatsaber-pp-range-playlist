@@ -23,7 +23,7 @@ Diff = TypedDict(
     },
 )
 Map = TypedDict(
-    "MapInfo",
+    "Map",
     {
         "automapper": Union[str, None],
         "bpm": int,
@@ -105,7 +105,6 @@ def construct_command_parser() -> argparse.Namespace:
     return parser.parse_args()
 
 
-# TODO
 def filter_map(all_maps: dict[str, Map], lower: float, upper: float) -> list[str]:
     map_list: list[str] = list()
     for map_hash, map_info in all_maps.items():
