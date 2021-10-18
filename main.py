@@ -106,24 +106,26 @@ def construct_command_parser() -> argparse.Namespace:
 
 
 def filter_map(all_maps: dict[str, Map], lower: float, upper: float) -> list[str]:
-    map_list: list[str] = list()
+    map_hash_list: list[str] = list()
     for map_hash, map_info in all_maps.items():
         for diff in map_info["diffs"]:
             if lower < float(diff["pp"]) <= upper:
-                map_list.append(map_hash)
-    return map_list
+                map_hash_list.append(map_hash)
+    return map_hash_list
 
 
 # TODO
-def construct_playlist(all_maps: dict[str, Map], map_list: list[str]) -> dict[str, Any]:
+def construct_playlist(
+    all_maps: dict[str, Map], map_hash_list: list[str]
+) -> dict[str, Any]:
     return dict()
 
 
 def main():
     args = construct_command_parser()
     all_maps = get_all_maps(args.source_file)
-    map_list = filter_map(all_maps, args.lower_bound, args.upper_bound)
-    playlist = construct_playlist(all_maps, map_list)
+    map_hash_list = filter_map(all_maps, args.lower_bound, args.upper_bound)
+    playlist = construct_playlist(all_maps, map_hash_list)
     with open(args.save_as, "w", encoding="utf-8") as f:
         f.write(json.dumps(playlist))
 
