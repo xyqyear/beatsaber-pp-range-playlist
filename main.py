@@ -50,7 +50,6 @@ Playlist = TypedDict(
         "playlistAuthor": str,
         "playlistDescription": str,
         "songs": list[PlaylistSong],
-        "image": str,
     },
 )
 
@@ -63,11 +62,6 @@ def download(url: str) -> bytes:
 
 
 # TODO
-def image_bytes_to_data_url(image_bytes: bytes) -> str:
-    return ""
-
-
-# TODO
 def decompress_gz(file_content: bytes) -> bytes:
     return b""
 
@@ -75,13 +69,12 @@ def decompress_gz(file_content: bytes) -> bytes:
 def get_all_maps(
     source: str,
 ) -> dict[str, Map]:
-    file_content = str()
     if source:
-        gz_file = download(beat_star_database_link)
-        file_content = decompress_gz(gz_file).decode("utf-8")
-    else:
         with open(source, "r", encoding="utf-8") as f:
             file_content = f.read()
+    else:
+        gz_file = download(beat_star_database_link)
+        file_content = decompress_gz(gz_file).decode("utf-8")
 
     return json.loads(file_content)
 
@@ -137,13 +130,13 @@ def filter_map(
                     diffs.append("ExpertPlus")
                 else:
                     diffs.append(diff["diff"])
-        map_hash_list.append((map_hash, diffs))
+        if diffs:
+            map_hash_list.append((map_hash, diffs))
     return map_hash_list
 
 
 def construct_playlist(
     map_hash_list: list[tuple[str, list[str]]],
-    image: bytes,
     title: str = "playlist",
     author: str = "",
     description: str = "",
@@ -159,7 +152,6 @@ def construct_playlist(
         "playlistAuthor": author,
         "playlistDescription": description,
         "songs": song_list,
-        "image": image_bytes_to_data_url(image),
     }
 
 
@@ -167,7 +159,9 @@ def main():
     args = construct_command_parser()
     all_maps = get_all_maps(args.source_file)
     map_hash_list = filter_map(all_maps, args.lower_bound, args.upper_bound)
-    playlist = construct_playlist(map_hash_list, b"")
+    playlist = construct_playlist(
+        map_hash_list, f"pp{args.lower_bound}-{args.upper_bound}"
+    )
     with open(args.save_as, "w", encoding="utf-8") as f:
         f.write(json.dumps(playlist))
 
