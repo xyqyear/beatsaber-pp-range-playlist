@@ -1,6 +1,6 @@
 import json
 import gzip
-from typing import Any, TypedDict, Union
+from typing import TypedDict, Union
 import urllib
 import argparse
 
@@ -63,6 +63,11 @@ def download(url: str) -> bytes:
 
 
 # TODO
+def image_bytes_to_data_url(image_bytes: bytes) -> str:
+    return ""
+
+
+# TODO
 def decompress_gz(file_content: bytes) -> bytes:
     return b""
 
@@ -120,27 +125,50 @@ def construct_command_parser() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def filter_map(all_maps: dict[str, Map], lower: float, upper: float) -> list[str]:
-    map_hash_list: list[str] = list()
+def filter_map(
+    all_maps: dict[str, Map], lower: float, upper: float
+) -> list[tuple[str, list[str]]]:
+    map_hash_list: list[tuple[str, list[str]]] = list()
     for map_hash, map_info in all_maps.items():
+        diffs: list[str] = list()
         for diff in map_info["diffs"]:
-            if lower < float(diff["pp"]) <= upper:
-                map_hash_list.append(map_hash)
+            if lower <= float(diff["pp"]) < upper:
+                if diff["diff"] == "Expert+":
+                    diffs.append("ExpertPlus")
+                else:
+                    diffs.append(diff["diff"])
+        map_hash_list.append((map_hash, diffs))
     return map_hash_list
 
 
-# TODO
 def construct_playlist(
-    all_maps: dict[str, Map], map_hash_list: list[str]
-) -> dict[str, Any]:
-    return dict()
+    all_maps: dict[str, Map],
+    map_hash_list: list[tuple[str, list[str]]],
+    image: bytes,
+    title: str = "playlist",
+    author: str = "",
+    description: str = "",
+) -> Playlist:
+    song_list: list[PlaylistSong] = list()
+    for song_hash, diffs in map_hash_list:
+        diff_list: list[PlaylistSongDiff] = []
+        for diff in diffs:
+            diff_list.append({"characteristic": "Standard", "name": diff})
+        song_list.append({"hash": song_hash, "difficulties": diff_list})
+    return {
+        "playlistTitle": title,
+        "playlistAuthor": author,
+        "playlistDescription": description,
+        "songs": song_list,
+        "image": image_bytes_to_data_url(image),
+    }
 
 
 def main():
     args = construct_command_parser()
     all_maps = get_all_maps(args.source_file)
     map_hash_list = filter_map(all_maps, args.lower_bound, args.upper_bound)
-    playlist = construct_playlist(all_maps, map_hash_list)
+    playlist = construct_playlist(all_maps, map_hash_list, b"")
     with open(args.save_as, "w", encoding="utf-8") as f:
         f.write(json.dumps(playlist))
 
