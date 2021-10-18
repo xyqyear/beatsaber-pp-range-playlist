@@ -1,13 +1,44 @@
 import json
 import gzip
-from typing import Any, Union
+from typing import Any, TypedDict, Union
 import urllib
 import argparse
 
 
 # ! [hash]['diffs'][0]['pp'] is str, need to be converted to float
-diff_info_T = dict[str, Union[str, int, float, None]]
-all_maps_T = dict[str, Union[list[diff_info_T], str, int, float]]
+Diff = TypedDict(
+    "Diff",
+    {
+        "bmb": int,
+        "diff": str,
+        "len": int,
+        "njs": int,
+        "njt": int,
+        "nts": int,
+        "obs": int,
+        "pp": str,
+        "scores": str,
+        "star": str,
+        "type": int,
+    },
+)
+Map = TypedDict(
+    "MapInfo",
+    {
+        "automapper": Union[str, None],
+        "bpm": int,
+        "diffs": list[Diff],
+        "downVotes": int,
+        "downloadCount": int,
+        "heat": float,
+        "key": str,
+        "mapper": str,
+        "rating": float,
+        "song": str,
+        "upVotes": int,
+        "uploaddate": str,
+    },
+)
 
 beat_star_database_link = "https://cdn.wes.cloud/beatstar/bssb/v2-all.json.gz"
 
@@ -23,7 +54,7 @@ def decompress_gz(file_content: bytes) -> bytes:
 
 def get_all_maps(
     source: str,
-) -> all_maps_T:
+) -> dict[str, Map]:
     file_content = str()
     if source:
         gz_file = download(beat_star_database_link)
@@ -75,12 +106,17 @@ def construct_command_parser() -> argparse.Namespace:
 
 
 # TODO
-def filter_map(all_maps: all_maps_T, lower: float, upper: float) -> list[str]:
-    return list()
+def filter_map(all_maps: dict[str, Map], lower: float, upper: float) -> list[str]:
+    map_list: list[str] = list()
+    for map_hash, map_info in all_maps.items():
+        for diff in map_info["diffs"]:
+            if lower < float(diff["pp"]) <= upper:
+                map_list.append(map_hash)
+    return map_list
 
 
 # TODO
-def construct_playlist(all_maps: all_maps_T, map_list: list[str]) -> dict[str, Any]:
+def construct_playlist(all_maps: dict[str, Map], map_list: list[str]) -> dict[str, Any]:
     return dict()
 
 
